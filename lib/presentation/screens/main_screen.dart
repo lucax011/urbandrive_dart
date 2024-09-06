@@ -14,10 +14,6 @@ class MainScreen extends StatelessWidget {
             onSelected: (String choice) {
               // Redirecionar de acordo com a escolha do usuário
               switch (choice) {
-                case 'Página inicial':
-                  Navigator.pushNamed(
-                      context, '/'); // Redireciona para a tela inicial
-                  break;
                 case 'Login':
                   Navigator.pushNamed(
                       context, '/login'); // Redireciona para a tela de login
@@ -29,8 +25,7 @@ class MainScreen extends StatelessWidget {
               }
             },
             itemBuilder: (BuildContext context) {
-              return {'Página inicial', 'Login', 'Registrar'}
-                  .map((String choice) {
+              return {'Login', 'Registrar'}.map((String choice) {
                 return PopupMenuItem<String>(
                   value: choice,
                   child: Text(choice),
