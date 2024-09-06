@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:urbandrive_dart/presentation/screens/login_screen.dart';
 import 'package:urbandrive_dart/presentation/screens/main_screen.dart';
 import 'package:urbandrive_dart/presentation/screens/register_screen.dart';
+import 'package:urbandrive_dart/presentation/screens/requestCar_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -16,7 +17,7 @@ class MyApp extends StatelessWidget {
       title: 'Urban Drive',
       theme: ThemeData(
         // Defina o tema da aplicação
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.pink),
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.white),
         useMaterial3: true,
       ),
       initialRoute: '/', // Define a rota inicial
@@ -24,6 +25,8 @@ class MyApp extends StatelessWidget {
         '/': (context) => MainScreen(), // Tela inicial
         '/login': (context) => LoginScreen(), // Tela de login
         '/register': (context) => RegisterScreen(), // Tela de registro
+        '/requestCar_screen': (context) =>
+            RequestAndNearbyCarsScreen(), // Tela de request para carros
       },
     );
   }
