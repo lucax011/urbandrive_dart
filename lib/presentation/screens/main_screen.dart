@@ -84,15 +84,16 @@ class MainScreen extends StatelessWidget {
                 margin: EdgeInsets.all(16),
                 child: Column(
                   children: [
-                    // Imagem dentro do Card
+                    // Imagem dentro do Card ajustada para preencher a largura do Card
                     ClipRRect(
-                      borderRadius: BorderRadius.vertical(
-                        top: Radius.circular(25),
-                      ),
-                      child: Image.asset(
-                        'lib/assets/img/cardphot.png',
-                        fit: BoxFit.cover,
-                      ),
+                        borderRadius: BorderRadius.vertical(
+                          top: Radius.circular(25),
+                        ),
+                        child: Image.asset(
+                          'lib/assets/img/cardphot.png',
+                          fit: BoxFit.cover,
+                          width: double.infinity, // Ajuste para imagem preencher a largura do Card
+                        )
                     ),
                     Padding(
                       padding: const EdgeInsets.all(16.0),
@@ -172,6 +173,7 @@ class MainScreen extends StatelessWidget {
                 ),
               ),
             ),
+            SizedBox(height: 50)
           ],
         ),
       ),

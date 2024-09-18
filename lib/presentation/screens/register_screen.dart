@@ -2,92 +2,95 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 
 class RegisterScreen extends StatelessWidget {
-  final TextEditingController nameController = TextEditingController();
-  final TextEditingController emailController = TextEditingController();
-  final TextEditingController passwordController = TextEditingController();
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            SizedBox(
-                height: 80), // Espaçamento para mover os campos mais para cima
-            // Campos de entrada
-            Text('Registre-se já',
-                style: TextStyle(
-                  fontSize: 24, // Tamanho da fonte
-                  fontWeight: FontWeight.bold, // Deixa o texto em negrito
-                  color:
-                      Colors.pink, // Cor do texto, ajuste conforme necessário
-                )),
-            SizedBox(height: 16),
-            TextField(
-              controller: nameController,
-              decoration: InputDecoration(
-                labelText: 'Nome',
-                fillColor: Colors.pink[100],
-                filled: true,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(25),
-                ),
-              ),
-            ),
-            SizedBox(height: 16),
-            TextField(
-              controller: emailController,
-              decoration: InputDecoration(
-                labelText: 'E-mail',
-                fillColor: Colors.pink[100],
-                filled: true,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(25),
-                ),
-              ),
-            ),
-            SizedBox(height: 16),
-            TextField(
-              controller: passwordController,
-              obscureText: true,
-              decoration: InputDecoration(
-                labelText: 'Senha',
-                fillColor: Colors.pink[100],
-                filled: true,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(25),
-                ),
-              ),
-            ),
-            SizedBox(height: 30), // Espaçamento antes do botão
-            // Botão de registro
-            ElevatedButton.icon(
+      body: Stack(
+        children: [
+          Positioned(
+            top: 40,
+            left: 10,
+            child: IconButton(
+              icon: Icon(Icons.arrow_back),
               onPressed: () {
-                Navigator.pushNamed(context, '/login');
+                Navigator.of(context).pop();
               },
-              icon: SvgPicture.asset('lib/assets/icons/arrow.svg'),
-              label: Text('Register'),
-              style: ElevatedButton.styleFrom(
-                foregroundColor: Colors.white,
-                backgroundColor: Colors.blue[300], // Cor de fundo mais clara
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(25),
-                ),
-                minimumSize: Size(150, 50), // Tamanho fixo do botão
+            ),
+          ),
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: Image.asset(
+              'lib/assets/img/background_image.png', // Caminho da imagem que você usará
+              height: MediaQuery.of(context).size.height * 0.4, // Define um tamanho relativo
+              fit: BoxFit.cover,
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 30.0),
+            child: SingleChildScrollView( // Resolving scrolling issues
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  SizedBox(height: MediaQuery.of(context).size.height * 0.2), // Ajusta para dar espaço
+                  TextField(
+                    decoration: InputDecoration(
+                      hintText: 'Nome',
+                      filled: true,
+                      fillColor: Colors.pinkAccent.withOpacity(0.2),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(30),
+                        borderSide: BorderSide.none,
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 20),
+                  TextField(
+                    decoration: InputDecoration(
+                      hintText: 'E-mail',
+                      filled: true,
+                      fillColor: Colors.pinkAccent.withOpacity(0.2),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(30),
+                        borderSide: BorderSide.none,
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 20),
+                  TextField(
+                    obscureText: true,
+                    decoration: InputDecoration(
+                      hintText: 'Senha',
+                      filled: true,
+                      fillColor: Colors.pinkAccent.withOpacity(0.2),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(30),
+                        borderSide: BorderSide.none,
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 40),
+                  ElevatedButton.icon(
+                    onPressed: () {
+                      Navigator.pushNamed(context, '/login');
+                    },
+                    icon: SvgPicture.asset(
+                      'lib/assets/icons/arrow.svg',
+                      height: 20, // Ajuste o tamanho do ícone conforme necessário
+                    ),
+                    label: Text("Register"),
+                    style: ElevatedButton.styleFrom(
+                      foregroundColor: Colors.white,
+                      backgroundColor: Colors.blueAccent,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
-            Spacer(), // Empurra a imagem para o rodapé
-            // Imagem de fundo, posicionada logo abaixo do botão
-            Image.asset(
-              'lib/assets/img/background_image.png', // Caminho da sua imagem
-              height: 250, // Ajuste o tamanho conforme necessário
-              fit: BoxFit.contain, // Ajusta a imagem
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
