@@ -1,38 +1,82 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
-class RegisterScreen extends StatelessWidget {
+import '../../config/api_service.dart';
+import '../../data/models/user.dart';
+// Import do modelo de usuário
+
+class RegisterScreen extends StatefulWidget {
+  @override
+  _RegisterScreenState createState() => _RegisterScreenState();
+}
+
+class _RegisterScreenState extends State<RegisterScreen> {
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+
+  final ApiService apiService = ApiService(); // Instância do serviço de API
+  bool _isLoading = false; // Controla o estado de carregamento
+
+  Future<void> _register() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    // Cria o objeto de usuário
+    User newUser = User(
+      name: _nameController.text,
+      email: _emailController.text,
+      password: _passwordController.text,
+    );
+
+    // Chama a função de registro
+    User? registeredUser = await apiService.registerUser(newUser);
+
+    setState(() {
+      _isLoading = false;
+    });
+
+    if (registeredUser != null) {
+      // Se o registro for bem-sucedido, mostre uma mensagem de sucesso
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Usuário registrado com sucesso!')),
+      );
+      // Navegar para a tela de login ou página inicial
+      Navigator.of(context).pushNamed('/login'); // Ajuste a rota conforme necessário
+    } else {
+      // Se houver um erro, mostre uma mensagem de erro
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Erro ao registrar o usuário.')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Stack(
         children: [
-          Positioned(
-            top: 40,
-            left: 10,
-            child: IconButton(
-              icon: Icon(Icons.arrow_back),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ),
+          // Imagem de fundo alinhada na parte inferior
           Align(
             alignment: Alignment.bottomCenter,
             child: Image.asset(
-              'lib/assets/img/background_image.png', // Caminho da imagem que você usará
-              height: MediaQuery.of(context).size.height * 0.4, // Define um tamanho relativo
+              'lib/assets/img/background_image.png',
+              height: MediaQuery.of(context).size.height * 0.4,
               fit: BoxFit.cover,
             ),
           ),
+          // Conteúdo principal com campos de entrada e botão de registro
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 30.0),
-            child: SingleChildScrollView( // Resolving scrolling issues
+            child: SingleChildScrollView(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  SizedBox(height: MediaQuery.of(context).size.height * 0.2), // Ajusta para dar espaço
+                  SizedBox(height: MediaQuery.of(context).size.height * 0.15),
+                  // Campo de Nome
                   TextField(
+                    controller: _nameController,
                     decoration: InputDecoration(
                       hintText: 'Nome',
                       filled: true,
@@ -44,7 +88,9 @@ class RegisterScreen extends StatelessWidget {
                     ),
                   ),
                   SizedBox(height: 20),
+                  // Campo de E-mail
                   TextField(
+                    controller: _emailController,
                     decoration: InputDecoration(
                       hintText: 'E-mail',
                       filled: true,
@@ -56,7 +102,9 @@ class RegisterScreen extends StatelessWidget {
                     ),
                   ),
                   SizedBox(height: 20),
+                  // Campo de Senha
                   TextField(
+                    controller: _passwordController,
                     obscureText: true,
                     decoration: InputDecoration(
                       hintText: 'Senha',
@@ -69,21 +117,36 @@ class RegisterScreen extends StatelessWidget {
                     ),
                   ),
                   SizedBox(height: 40),
+                  // Botão de Registro
                   ElevatedButton.icon(
-                    onPressed: () {
-                      Navigator.pushNamed(context, '/login');
-                    },
-                    icon: SvgPicture.asset(
+                    onPressed: _isLoading ? null : _register, // Desativa o botão se estiver carregando
+                    icon: _isLoading
+                        ? CircularProgressIndicator(
+                      color: Colors.white,
+                    )
+                        : SvgPicture.asset(
                       'lib/assets/icons/arrow.svg',
-                      height: 20, // Ajuste o tamanho do ícone conforme necessário
+                      height: 20,
                     ),
-                    label: Text("Register"),
+                    label: _isLoading ? Text("") : Text("Registrar"),
                     style: ElevatedButton.styleFrom(
                       foregroundColor: Colors.white,
                       backgroundColor: Colors.blueAccent,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(30),
                       ),
+                      padding: EdgeInsets.symmetric(vertical: 14, horizontal: 24),
+                    ),
+                  ),
+                  SizedBox(height: 20),
+                  // Botão login
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pushNamed(context, '/login');
+                    },
+                    child: Text(
+                      'Já tem uma conta? Faça login!',
+                      style: TextStyle(color: Colors.blueAccent),
                     ),
                   ),
                 ],
