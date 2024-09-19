@@ -39,7 +39,7 @@ class _LoginScreenState extends State<LoginScreen> {
         SnackBar(content: Text('Login realizado com sucesso!')),
       );
       // Navegar para a tela inicial ou outra página
-      Navigator.of(context).pushNamed('/home'); // Ajuste a rota conforme necessário
+      Navigator.of(context).pushNamed('/requestCar_screen'); // Ajuste a rota conforme necessário
     } else {
       // Se houver um erro, mostre uma mensagem de erro
       ScaffoldMessenger.of(context).showSnackBar(
@@ -66,7 +66,7 @@ class _LoginScreenState extends State<LoginScreen> {
           Align(
             alignment: Alignment.bottomCenter,
             child: Image.asset(
-              'lib/assets/img/background_image.png', // Caminho da imagem que você usará
+              'lib/assets/img/background_image.png', // Caminho da imagem
               height: MediaQuery.of(context).size.height * 0.4, // Define um tamanho relativo
               fit: BoxFit.cover,
             ),

@@ -23,31 +23,39 @@ class _RegisterScreenState extends State<RegisterScreen> {
       _isLoading = true;
     });
 
-    // Cria o objeto de usuário
-    User newUser = User(
-      name: _nameController.text,
-      email: _emailController.text,
-      password: _passwordController.text,
-    );
-
-    // Chama a função de registro
-    User? registeredUser = await apiService.registerUser(newUser);
-
-    setState(() {
-      _isLoading = false;
-    });
-
-    if (registeredUser != null) {
-      // Se o registro for bem-sucedido, mostre uma mensagem de sucesso
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Usuário registrado com sucesso!')),
+    try {
+      // Cria o objeto de usuário
+      User newUser = User(
+        name: _nameController.text,
+        email: _emailController.text,
+        password: _passwordController.text,
       );
-      // Navegar para a tela de login ou página inicial
-      Navigator.of(context).pushNamed('/login'); // Ajuste a rota conforme necessário
-    } else {
-      // Se houver um erro, mostre uma mensagem de erro
+
+      // Chama a função de registro
+      User? registeredUser = await apiService.registerUser(newUser);
+
+      setState(() {
+        _isLoading = false;
+      });
+
+      if (registeredUser != null) {
+        // Se o registro for bem-sucedido, mostre uma mensagem de sucesso
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Usuário registrado com sucesso!')),
+        );
+        // Navegar para a tela de login ou página inicial
+        Navigator.of(context).pushNamed('/login'); // Ajuste a rota conforme necessário
+      } else {
+        // Se houver um erro, lançamos uma exceção
+        throw Exception('Erro ao registrar o usuário.');
+      }
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+      // Exibe a mensagem de erro no SnackBar
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erro ao registrar o usuário.')),
+        SnackBar(content: Text(e.toString())),
       );
     }
   }
@@ -58,6 +66,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
       body: Stack(
         children: [
           // Imagem de fundo alinhada na parte inferior
+          Positioned(
+            top: 40,
+            left: 10,
+            child: IconButton(
+              icon: Icon(Icons.arrow_back),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ),
           Align(
             alignment: Alignment.bottomCenter,
             child: Image.asset(
