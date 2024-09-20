@@ -19,6 +19,21 @@ class _RegisterScreenState extends State<RegisterScreen> {
   bool _isLoading = false; // Controla o estado de carregamento
 
   Future<void> _register() async {
+    // Valida se os campos estão preenchidos
+    if (_nameController.text.isEmpty ||
+        _emailController.text.isEmpty ||
+        _passwordController.text.isEmpty) {
+      // Fecha o teclado e desfoca os campos de texto antes de mostrar o SnackBar
+      FocusScope.of(context).unfocus();
+
+      await Future.delayed(Duration(milliseconds: 300)); // Aguarda brevemente o teclado fechar
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Por favor, preencha todos os campos.')),
+      );
+      return; // Saímos da função caso algum campo esteja vazio
+    }
+
     setState(() {
       _isLoading = true;
     });
@@ -39,24 +54,37 @@ class _RegisterScreenState extends State<RegisterScreen> {
       });
 
       if (registeredUser != null) {
+        // Fecha o teclado antes de exibir o SnackBar
+        FocusScope.of(context).unfocus();
+
+        await Future.delayed(Duration(milliseconds: 300)); // Aguarda o teclado fechar
+
         // Se o registro for bem-sucedido, mostre uma mensagem de sucesso
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Usuário registrado com sucesso!')),
         );
         // Navegar para a tela de login ou página inicial
         Navigator.of(context).pushNamed('/login'); // Ajuste a rota conforme necessário
-      } else {
-        // Se houver um erro, lançamos uma exceção
-        throw Exception('Erro ao registrar o usuário.');
       }
     } catch (e) {
-      setState(() {
-        _isLoading = false;
-      });
-      // Exibe a mensagem de erro no SnackBar
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.toString())),
-      );
+
+      // Fecha o teclado antes de exibir o SnackBar
+      FocusScope.of(context).unfocus();
+
+      await Future.delayed(Duration(milliseconds: 300)); // Aguarda o teclado fechar
+
+      // Verifica se o erro é relacionado a usuário já cadastrado
+      if (e.toString().contains('Email ja esta cadastrado')) {
+        // Exibe a mensagem personalizada no SnackBar
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Usuário já cadastrado. Faça login.')),
+        );
+      } else {
+        // Exibe a mensagem de erro genérica no SnackBar
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(e.toString())),
+        );
+      }
     }
   }
 

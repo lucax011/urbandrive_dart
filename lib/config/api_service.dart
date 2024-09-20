@@ -12,9 +12,14 @@ class ApiService {
       body: jsonEncode(user.toJson()),
     );
 
-    if (response.statusCode == 200 || response.statusCode == 201) {
-      return User.fromJson(jsonDecode(response.body));
+    // Verifica se o status code é 201 (usuário criado com sucesso)
+    if (response.statusCode == 200|| response.statusCode == 201) {
+      return User.fromJson(jsonDecode(response.body)); // Retorna o usuário com ID
+    } else if (response.statusCode == 409) {
+      // O e-mail já está registrado
+      throw Exception('Email ja esta cadastrado');
     } else {
+      // Outros erros
       return null;
     }
   }
