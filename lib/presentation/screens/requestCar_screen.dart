@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'Mapscreen.dart';
+import '../../data/models/car.dart';
+import '../../config/api_service.dart';
 
 class RequestAndNearbyCarsScreen extends StatefulWidget {
   @override
@@ -8,13 +12,45 @@ class RequestAndNearbyCarsScreen extends StatefulWidget {
 
 class _RequestAndNearbyCarsScreenState
     extends State<RequestAndNearbyCarsScreen> {
-  bool showNearbyCars = false; // Controle de exibição da lista de carros
+  bool showNearbyCars = false;
+  List<Car> nearbyCars = [];
+  GoogleMapController? mapController;
+  final LatLng _initialLocation = LatLng(-23.55052, -46.633308);
+  Set<Marker> carMarkers = Set();
 
-  void toggleNearbyCars() {
+  void toggleNearbyCars() async {
+    ApiService apiService = ApiService();
+    List<Car> cars = await apiService.getNearbyCars();
+
     setState(() {
-      showNearbyCars =
-          true; // Exibe os carros próximos quando o botão é pressionado
+      nearbyCars = cars;
+      showNearbyCars = true;
+      _addCarMarkers();
     });
+  }
+
+  void _addCarMarkers() {
+    Set<Marker> markers = nearbyCars.map((car) {
+      return Marker(
+        markerId: MarkerId(car.id.toString()),
+        position: LatLng(car.latitude, car.longitude),
+        infoWindow: InfoWindow(title: '${car.brand} ${car.model}'),
+      );
+    }).toSet();
+
+    setState(() {
+      carMarkers = markers;
+    });
+  }
+
+  void _onMapCreated(GoogleMapController controller) {
+    mapController = controller;
+  }
+
+  void _zoomToCar(Car car) {
+    mapController?.animateCamera(
+      CameraUpdate.newLatLngZoom(LatLng(car.latitude, car.longitude), 16),
+    );
   }
 
   @override
@@ -22,24 +58,19 @@ class _RequestAndNearbyCarsScreenState
     return Scaffold(
       body: Stack(
         children: [
-          // Adicionar um mapa ou imagem placeholder
-          Center(
-            child: Image.asset(
-              'lib/assets/img/map_placeholder.png', // Substitua pelo Google Maps ou outra API
-              fit: BoxFit.cover,
-              height: MediaQuery.of(context).size.height,
-              width: MediaQuery.of(context).size.width,
-            ),
+          // Aqui você usa o MapScreen modularizado
+          MapScreen(
+            initialLocation: _initialLocation,
+            carMarkers: carMarkers,
+            onMapCreated: _onMapCreated,
           ),
-          // Botão para solicitar um carro, inicialmente visível
           if (!showNearbyCars)
             Align(
               alignment: Alignment.bottomCenter,
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: ElevatedButton(
-                  onPressed:
-                      toggleNearbyCars, // Ação para exibir os carros próximos
+                  onPressed: toggleNearbyCars,
                   child: Text('Solicite um carro'),
                   style: ElevatedButton.styleFrom(
                     foregroundColor: Colors.white,
@@ -47,19 +78,17 @@ class _RequestAndNearbyCarsScreenState
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(25),
                     ),
-                    minimumSize: Size(double.infinity, 50), // Largura total
+                    minimumSize: Size(double.infinity, 50),
                   ),
                 ),
               ),
             ),
-          // Lista de carros próximos, exibida quando o botão é pressionado
           if (showNearbyCars)
             DraggableScrollableSheet(
               initialChildSize: 0.6,
               minChildSize: 0.3,
               maxChildSize: 0.8,
-              builder:
-                  (BuildContext context, ScrollController scrollController) {
+              builder: (BuildContext context, ScrollController scrollController) {
                 return Container(
                   color: Colors.pink[200],
                   child: Column(
@@ -76,49 +105,24 @@ class _RequestAndNearbyCarsScreenState
                         ),
                       ),
                       Expanded(
-                        child: GridView.builder(
+                        child: ListView.builder(
                           controller: scrollController,
-                          gridDelegate:
-                              SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 2, // Define o número de colunas
-                            crossAxisSpacing:
-                                10, // Espaçamento entre as colunas
-                            mainAxisSpacing: 10, // Espaçamento entre as linhas
-                            childAspectRatio: 0.75, // Proporção dos itens
-                          ),
-                          itemCount: 2, // Número de itens na grid
+                          itemCount: nearbyCars.length,
                           itemBuilder: (context, index) {
-                            // Adiciona os cards dos carros
-                            if (index == 0) {
-                              return CarCard(
-                                carName: 'Ford Ka 2020',
-                                distance: '150 metros',
-                                price: '15 Reais/hora',
-                                imagePath: 'lib/assets/img/ford_ka.png',
-                              );
-                            } else {
-                              return CarCard(
-                                carName: 'Golf Tsi',
-                                distance: '50 metros',
-                                price: '25 Reais/hora',
+                            Car car = nearbyCars[index];
+                            return GestureDetector(
+                              onTap: () {
+                                _zoomToCar(car);
+                              },
+                              child: CarCard(
+                                carName: '${car.brand} ${car.model} - ${car.year}',
+                                plate: car.plate,
+                                distance: '${car.latitude}, ${car.longitude}',
+                                price: '15 RS/Minuto',
                                 imagePath: 'lib/assets/img/golf_tsi.png',
-                              );
-                            }
+                              ),
+                            );
                           },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: ElevatedButton(
-                          onPressed: () {
-                            // Ação ao clicar em continuar
-                          },
-                          child: Text('Continue'),
-                          style: ElevatedButton.styleFrom(
-                            foregroundColor: Colors.white,
-                            backgroundColor: Colors.green,
-                            minimumSize: Size(double.infinity, 50),
-                          ),
                         ),
                       ),
                     ],
@@ -132,14 +136,17 @@ class _RequestAndNearbyCarsScreenState
   }
 }
 
+// Componente para exibir as informações do carro
 class CarCard extends StatelessWidget {
   final String carName;
+  final String plate;
   final String distance;
   final String price;
   final String imagePath;
 
   CarCard({
     required this.carName,
+    required this.plate,
     required this.distance,
     required this.price,
     required this.imagePath,
@@ -169,14 +176,14 @@ class CarCard extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  distance,
+                  'Placa: $plate',
                   style: TextStyle(
                     fontSize: 14,
                     color: Colors.white,
                   ),
                 ),
                 Text(
-                  price,
+                  'Localização: $distance',
                   style: TextStyle(
                     fontSize: 14,
                     color: Colors.white,
