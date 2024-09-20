@@ -17,6 +17,7 @@ class _RequestAndNearbyCarsScreenState
   GoogleMapController? mapController;
   final LatLng _initialLocation = LatLng(-23.55052, -46.633308);
   Set<Marker> carMarkers = Set();
+  int? selectedCarIndex;
 
   void toggleNearbyCars() async {
     ApiService apiService = ApiService();
@@ -49,7 +50,7 @@ class _RequestAndNearbyCarsScreenState
 
   void _zoomToCar(Car car) {
     mapController?.animateCamera(
-      CameraUpdate.newLatLngZoom(LatLng(car.latitude, car.longitude), 16),
+      CameraUpdate.newLatLngZoom(LatLng(car.latitude, car.longitude), 20),
     );
   }
 
@@ -85,9 +86,9 @@ class _RequestAndNearbyCarsScreenState
             ),
           if (showNearbyCars)
             DraggableScrollableSheet(
-              initialChildSize: 0.6,
-              minChildSize: 0.3,
-              maxChildSize: 0.8,
+              initialChildSize: 0.4, // Ajuste conforme necessário
+              minChildSize: 0.4,     // Ajuste conforme necessário
+              maxChildSize: 0.4,     // Ajuste conforme necessário
               builder: (BuildContext context, ScrollController scrollController) {
                 return Container(
                   color: Colors.pink[200],
@@ -100,26 +101,32 @@ class _RequestAndNearbyCarsScreenState
                           style: TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
-                            color: Colors.white,
+                            color: Colors.black,
                           ),
                         ),
                       ),
+                      // Mantendo o tamanho fixo para o card e garantindo o tamanho da imagem
                       Expanded(
                         child: ListView.builder(
                           controller: scrollController,
+                          scrollDirection: Axis.horizontal,
                           itemCount: nearbyCars.length,
                           itemBuilder: (context, index) {
                             Car car = nearbyCars[index];
                             return GestureDetector(
                               onTap: () {
-                                _zoomToCar(car);
+                                setState(() {
+                                  selectedCarIndex = index; // Marca o carro como selecionado
+                                });
+                                _zoomToCar(car); // Zoom no carro quando clicado
                               },
                               child: CarCard(
                                 carName: '${car.brand} ${car.model} - ${car.year}',
                                 plate: car.plate,
                                 distance: '${car.latitude}, ${car.longitude}',
-                                price: '15 RS/Minuto',
+                                price: '15 R\$ /hora',
                                 imagePath: 'lib/assets/img/golf_tsi.png',
+                                isSelected: selectedCarIndex == index, // Verifica se o carro está selecionado
                               ),
                             );
                           },
@@ -129,7 +136,7 @@ class _RequestAndNearbyCarsScreenState
                   ),
                 );
               },
-            ),
+            )
         ],
       ),
     );
@@ -143,6 +150,7 @@ class CarCard extends StatelessWidget {
   final String distance;
   final String price;
   final String imagePath;
+  final bool isSelected;
 
   CarCard({
     required this.carName,
@@ -150,49 +158,74 @@ class CarCard extends StatelessWidget {
     required this.distance,
     required this.price,
     required this.imagePath,
+    this.isSelected = false,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      color: Colors.black12,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(15),
-      ),
-      child: Column(
-        children: [
-          Image.asset(imagePath, fit: BoxFit.cover),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  carName,
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-                Text(
-                  'Placa: $plate',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.white,
-                  ),
-                ),
-                Text(
-                  'Localização: $distance',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.white,
-                  ),
-                ),
-              ],
+    // Definindo tamanho fixo para o card e a imagem
+    final double cardWidth = 200; // Tamanho fixo para o card
+    final double cardHeight = 200; // Altura fixa para o card
+
+    return SizedBox(
+      width: cardWidth, // Tamanho fixo da largura do card
+      height: cardHeight, // Altura fixa do card
+      child: Card(
+        color: isSelected ? Colors.pink[300] : Colors.black12, // Cor do card quando selecionado
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(15),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.vertical(top: Radius.circular(15)),
+              child: Image.asset(
+                imagePath,
+                fit: BoxFit.cover,
+                width: cardWidth,
+                height: cardHeight * 0.5, // Garantindo que a imagem tenha metade do tamanho do card
+              ),
             ),
-          ),
-        ],
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    carName,
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                  Text(
+                    'Placa: $plate',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.white,
+                    ),
+                  ),
+                  Text(
+                    'Localização: $distance',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.white,
+                    ),
+                  ),
+                  Text(
+                    price,
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.white,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
